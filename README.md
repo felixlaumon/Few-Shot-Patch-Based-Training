@@ -47,7 +47,7 @@ result is saved in Zuzka2_gen/res__P
 To generate the results, run `generate.py`.
 
 ```
-python generate.py
+python generate.py \
     --checkpoint "Zuzka2_train/logs_reference_P/model_00020.pth" \
     --data_root "Zuzka2_gen" \
     --dir_input "input_filtered" \
@@ -232,3 +232,51 @@ for your research or work, please use the following BibTeX entry.
 }
 ```
 
+
+## Helper commands
+
+To resize the video
+
+```
+ffmpeg -i videos/koolshooter.mp4 -vf scale=1280:720 videos/koolshooter_small.mp4
+mv videos/koolshooter_small.mp4 video/koolshooter.mp4
+```
+
+To convert video to frames
+
+```
+mkdir -p Koolshooter_gen/input_filtered
+ffmpeg -i videos/koolshooter.mp4 Koolshooter_gen/input_filtered/$filename%03d.png
+```
+
+To copy to train folder
+
+```
+mkdir -p Koolshooter_train/input_filtered
+cp Koolshooter_gen/input_filtered/030.png Koolshooter_train/input_filtered
+```
+
+To convert JPEG to PNG
+
+```
+cd Koolshooter_train/output
+convert 030.jpeg 030.png
+rm *.jpeg
+```
+
+To train model
+
+```
+python train.py --config "_config/reference_P.yaml" \
+    --data_root "Koolshooter_train" \
+    --log_interval 1000 \
+    --log_folder logs_reference_P
+```
+
+To convert images to video
+
+```
+ffmpeg -r 30 -i Koolshooter_gen/res__P/0058000/%03d.png \
+    -c:v libx264 -vf "fps=25,format=yuv420p" \
+    Koolshooter_gen/res__P/0058000/out.mp4
+```
